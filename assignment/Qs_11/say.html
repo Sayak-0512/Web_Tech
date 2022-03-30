@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        th {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <button onclick = "addNewEntry()">Add</button>
+    <button onclick = "showAll()" id="showbtn">Show</button>
+
+    <div id="showData" style="display: none;">
+        <table style="width: 100%;">
+        </table>
+    </div>
+</body>
+<script>
+    var data=[
+    {
+            name: "Monitor",
+            manufacturer: "Lenovo",
+            price: 23000,
+    },
+    {
+            name: "Monitor",
+            manufacturer: "Lenovo",
+            price: 23000,
+    }
+    ]
+
+    function showAll(){
+        document.getElementById("showData").style.display="unset";
+        var res="<tr><th>Name</th><th>Manufacturer</th><th>Price</th><th></th><th></th></tr>";
+        data.forEach(function(d){
+            res+="<tr>";
+            res+="<td class='name'>"+d.name+"</td>";
+            res+="<td class='manufacturer'>"+d.manufacturer+"</td>";
+            res+="<td>"+d.price+"</td>";
+            res+="<td><button onclick='handleUpdate(this)'>Update</button></td>";
+            res+="<td><button onclick='handleDelete(this)'>Delete</button></td>";
+            res+="</tr>";
+        })
+        document.querySelector("#showData table").innerHTML=res;
+        document.getElementById("showbtn").setAttribute("disabled",true);
+    }
+    function handleDelete(e){
+        var name=e.parentElement.parentElement.querySelector('.name');
+        var manufacturer=e.parentElement.parentElement.querySelector('.manufacturer');
+        //Delete from db
+        showAll();
+    }
+    function handleUpdate(e){
+        
+    }
+</script>
+</html>
