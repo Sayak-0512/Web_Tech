@@ -1,0 +1,84 @@
+<html>
+<body style="text-align: center;margin-top: 200px;">
+<form method="post">
+	<label for="username">UserName</label>
+	<input type="text" name="username" id="username" onkeyup="handleChangeUsername()">
+	<p style="color:red;margin: 0;display: none;"></p>
+	<br><br>
+	<label for="password">Password</label>
+	<input type="password" name="password" id="password" onkeyup="handleChangePassword()">
+	<p style="color:red;margin: 0;display: none;"></p>
+	<br><br>
+	<button type="button" onclick="handleSubmit()">Sumbit</button>
+</form>
+<script>
+	function validateUsername(){
+		var userName=document.getElementById('username').value;
+		if(userName.length<10)
+			return "Username cannot be less than 10 characters.";
+		else{
+			if(userName.match(/^[a-zA-Z0-9_]*$/))
+				return true;
+			else
+				return "Username must only contain alphanumeric characters and underscores.";
+		}
+
+	}
+	function validatePassword(){
+		var passWord=document.getElementById('password').value;
+		if(passWord.length<6)
+			return "Password must be of atleast 6 characters.";
+		if(passWord.length>10)
+			return "Password cannot be more than 10 characters.";
+		var upperCase=0,digits=0;
+		for(var i=0;i<passWord.length;i++){
+			if(passWord.charCodeAt(i)>=65 && passWord.charCodeAt(i)<=90)
+				upperCase++;
+			if(passWord.charCodeAt(i)>=48 && passWord.charCodeAt(i)<=57)
+				digits++;
+		}
+		if(upperCase==0 && digits==0)
+			return "Password must contain atleast one uppercase alphabet and one numeric character."
+		if(upperCase==0)
+			return "Password must contain atleast one uppercase alphabet."
+		if(digits==0)
+			return "Password must contain atleast one numeric character."
+
+		return true
+
+	}
+	function handleChangeUsername(){
+		var username=document.getElementById('username');
+		username.style.border="1px solid black";
+		username.previousElementSibling.style.color="black";
+		username.nextElementSibling.style.display="none";
+	}
+	function handleChangePassword(){
+		var password=document.getElementById('password');
+		password.style.border="1px solid black";
+		password.previousElementSibling.style.color="black";
+		password.nextElementSibling.style.display="none";
+	}
+	function handleSubmit(){
+			if(validatePassword()==true && validateUsername()==true)
+				alert('Correct credentials.')
+			else{
+				if(validateUsername()!=true){
+						var username=document.getElementById('username');
+						username.style.border="1px solid red";
+						username.previousElementSibling.style.color="red";
+						username.nextElementSibling.style.display="block";
+						username.nextElementSibling.innerHTML=validateUsername();
+				}
+				if(validatePassword()!=true){
+					var password=document.getElementById('password');
+					password.style.border="1px solid red";
+					password.previousElementSibling.style.color="red";
+					password.nextElementSibling.style.display="block";
+					password.nextElementSibling.innerHTML=validatePassword();
+				}
+			}
+	}
+</script>
+</body>
+</html>

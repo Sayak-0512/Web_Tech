@@ -1,0 +1,423 @@
+<html>
+<style>
+    button {
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <button>Add Data</button>
+    <button>Show Data</button>
+</body>
+<script type="text/javascript">
+    if (!window.indexedDB) {
+        console.log(
+            "Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available."
+        );
+    }
+    var db;
+    var request = indexedDB.open("sayakDb");
+    request.onupgradeneeded = function() {
+        const db = request.result;
+        const store = db.createObjectStore("products", {
+            keyPath: ["name", "manufacturer"],
+        });
+        const priceIndex = store.createIndex("by_price", "price");
+        store.put({
+            name: "Monitor",
+            manufacturer: "Lenovo",
+            price: 23000,
+        });
+        store.put({
+            name: "Keyboard",
+            manufacturer: "Redgear",
+            price: 2000,
+        });
+        store.put({
+            name: "Mouse",
+            manufacturer: "Redgear",
+            price: 1000,
+        });
+    };
+
+    request.onsuccess = function() {
+        db = request.result;
+    };
+</script>
+
+</html>
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+
+<html>
+   <head>
+      <meta http-equiv = "Content-Type" content = "text/html; charset = utf-8" />
+      <title>Department Database</title>
+       <style>
+
+      table, th, td {
+        border: 1px solid black; 
+        text-align: left;
+        padding: 0 20px;
+        text-transform: capitalize;
+      }
+	  
+	  div {
+	  text-align: center;
+	  font-weight:bold;
+	  }
+	  
+	  button,input[type = button],input[type=reset]{
+	  font-size: 20px
+	  }
+	  
+
+	  
+	  
+
+      </style>
+
+      <script type = "text/javascript">
+         
+         //prefixes of implementation that we want to test
+         window.indexedDB = window.indexedDB || window.mozIndexedDB ||
+         window.webkitIndexedDB || window.msIndexedDB;
+         
+         //prefixes of window.IDB objects
+         window.IDBTransaction = window.IDBTransaction ||
+         window.webkitIDBTransaction || window.msIDBTransaction;
+         window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange ||
+         window.msIDBKeyRange
+         
+         if (!window.indexedDB) {
+            window.alert("Your browser doesn't support a stable version of IndexedDB.")
+         }
+         
+         const studentData = [];
+         var db;
+         var request = window.indexedDB.open("newDatabase", 1);
+         
+         request.onerror = function(event) {
+            console.log("Error occured on requesting a database" );
+         };
+         
+         request.onsuccess = function(event) {
+            db = request.result;
+            console.log("Database connected : "+ db);
+         };
+         
+         request.onupgradeneeded = function(event) {
+            
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("student", {keyPath: "roll"});
+           
+            for (var i in studentData) {
+               objectStore.add(studentData[i]);
+            }
+
+         }
+         
+         function add() {
+            document.getElementById("add").hidden = false;
+            document.getElementById("remove").hidden = true;
+            document.getElementById("update").hidden = true;
+            document.getElementById("show").hidden = true;
+         }
+         
+         function submitForm() {
+            
+            var studentRoll = document.getElementById("roll").value;
+            var studentName = document.getElementById("name").value;
+            var studentYear = document.getElementById("year").value;
+            var studentSemester = document.getElementById("sem").value;
+            var studentMobile = document.getElementById("mobile").value;
+
+            if(studentRoll == "")
+            {
+              alert("Cannot add to database without the roll number. (Primary Key)");
+              return;
+            }
+
+            var request = db.transaction(["student"], "readwrite")
+            .objectStore("student")
+            .add({ roll: studentRoll, name: studentName, year: studentYear, semester: studentSemester, mobile: studentMobile});
+           
+            request.onsuccess = function(event) {
+               alert("Roll " + studentRoll + " has been added to the database.");
+               document.getElementById("resetadd").click();
+               //document.getElementById("add").hidden = true;
+               //document.getElementById("showid").click();
+            };
+           
+            request.onerror = function(event) {
+               alert("Roll " + studentRoll + " is already present. \nUnable to add to database. ");
+            }
+         }
+
+         function show() {
+            document.getElementById("tableinfo").innerHTML = "";
+            document.getElementById("add").hidden = true;
+            document.getElementById("remove").hidden = true;
+            document.getElementById("update").hidden = true;
+            document.getElementById("show").hidden = false;
+            var request = db.transaction(["student"], "readwrite")
+                        .objectStore("student")
+                        .getAll();
+
+            request.onsuccess = function(event)
+            {
+                console.log(request.result);
+                var tableinfo = request.result;
+                //console.log(tableinfo)
+                
+                if(tableinfo.length == 0)
+                {
+                  return;
+                }
+
+                var keys = Object.keys(tableinfo[0]);
+                console.log(keys);
+                
+                var table = document.getElementById("tableinfo");
+                
+
+                var row = table.insertRow(0);
+                for(i in keys){
+                  console.log(keys[i]);
+                  row.insertCell(i).outerHTML = "<th>"+keys[i]+"</th>";
+                }
+
+                var idx = 1;
+                for(i in tableinfo)
+                {
+                  var obj = Object.values(tableinfo[i]);
+
+                  var row = table.insertRow(idx);
+                  for(j in obj)
+                  {
+                    //console.log(obj[j]);;
+                    var cell = row.insertCell(j);
+                    cell.innerHTML = obj[j];
+                  }
+
+                  idx++;
+
+                }
+            }
+         }
+
+         function update() 
+         {
+            document.getElementById("add").hidden = true;
+            document.getElementById("remove").hidden = true;
+            document.getElementById("update").hidden = false;
+            document.getElementById("updatetableinfo").hidden = true;
+            document.getElementById("show").hidden = true;
+         }
+
+        function upRoll()
+        {
+            var studentRoll = document.getElementById("rollup").value;
+                        var request = db.transaction(["student"], "readwrite")
+                        .objectStore("student")
+                        .get(studentRoll);
+
+            request.onerror = function(event)
+            {
+              alert("tableinfo of Roll " + studentRoll + " could not be found!");
+            }            
+
+            request.onsuccess = function(event){
+            console.log(request.result);
+
+            if(request.result == undefined)
+            {
+              alert(studentRoll + " is not present in database so cannot be updated.");
+              return;
+            }
+
+            document.getElementById("uproll").value = request.result.roll;
+            document.getElementById("upname").value = request.result.name;
+            document.getElementById("upyear").value = request.result.year;
+            document.getElementById("upsem").value = request.result.semester;
+            document.getElementById("upmobile").value = request.result.mobile;
+            document.getElementById("updatetableinfo").hidden = false;
+            }
+
+        }
+
+        function upsubmitForm(){
+            document.getElementById("uproll").disabled = true;
+            var studentRoll = document.getElementById("uproll").value;
+            var studentName = document.getElementById("upname").value;
+            var studentYear = document.getElementById("upyear").value;
+            var studentSemester = document.getElementById("upsem").value;
+            var studentMobile = document.getElementById("upmobile").value;
+            const studentobject = {roll: studentRoll, name: studentName, year: studentYear, semester: studentSemester, mobile: studentMobile};
+            var request = db.transaction(["student"], "readwrite")
+                    .objectStore("student")
+                    .put(studentobject);
+
+            request.onsuccess = function(event)
+            {
+              alert("Roll " + studentRoll + " is updated.");
+              document.getElementById("resetup").click();
+              document.getElementById("updatetableinfo").hidden = true;
+              //document.getElementById("update").hidden = true;
+              //document.getElementById("showid").click();
+            }
+
+            request.onerror = function(event) {
+                alert("Roll " + studentRoll + " could not be updated.");
+            }
+        }
+         
+        function remove() {
+            // var studentRoll = document.getElementById("rollget").value;
+            document.getElementById("add").hidden = true;
+            document.getElementById("remove").hidden = false;
+            document.getElementById("update").hidden = true;
+            document.getElementById("show").hidden = true;
+         }
+
+        function delRoll() {
+            var studentRoll = document.getElementById("rolldel").value;
+            var request = db.transaction(["student"], "readwrite")
+            .objectStore("student")
+            .delete(studentRoll);
+           
+            request.onsuccess = function(event) {
+
+               alert("Roll " + studentRoll + " has been removed from your database.");
+               document.getElementById("resetroll").click();
+               //document.getElementById("remove").hidden = true;
+               //document.getElementById("showid").click();
+            };
+
+            request.onerror = function(event) {
+               alert("Roll " + studentRoll + " not found!");
+            }
+         }
+
+      </script>
+     
+   </head>
+
+   <body>
+
+
+      <button onclick = "add()">Add</button>
+      <button onclick = "show()" id="showid">Show</button>
+      <button onclick = "update()">Update</button>
+      <button onclick = "remove()">Delete</button>
+
+
+      <div id="add" hidden>
+          <form>
+            <hr>
+            <p>Roll Number -</p>
+            <input id="roll" type="text">
+            <hr>
+            <p>Name -</p>
+            <input id="name" type="text">
+            <hr>
+            <p>Year -</p>
+            <select id="year">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <hr>
+            <p>Semester -</p>
+            <select id="sem">
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+            <hr>
+            <p>Mobile Number -</p>
+            <input id="mobile" type="text">
+            <br><br>
+            <hr>
+            <input type="button" id="submit" value="Add" onclick="submitForm()">
+            <input type="reset" id="resetadd" value="Reset">
+          </form>
+      </div>
+
+      <div id="remove" hidden>
+          <form>
+            <hr>
+            <p>Roll Number -</p>
+            <input id="rolldel" type="text">
+            <br><br>
+            <hr>
+            <input type="button" id="del" value="Delete" onclick="delRoll()">
+            <input type="reset" id="resetroll" value="Reset">
+          </form>
+      </div>
+
+
+      <div id="update" hidden>
+          <form>
+            <hr>
+            <p>Roll Number -</p>
+            <input id="rollup" type="text">
+            <br><br>
+            <hr>
+            <input type="button" id="up" value="Update" onclick="upRoll()">
+            <input type="reset" id="resetrollup" value="Reset">
+            
+            <div id="updatetableinfo" hidden>
+            <form>
+                <hr>
+                <p>Roll Number -</p>
+                <input id="uproll" type="text">
+                <hr>
+                <p>Name -</p>
+                <input id="upname" type="text">
+                <hr>
+                <p>Year -</p>
+                <select id="upyear">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <hr>
+                <p>Semester -</p>
+                <select id="upsem">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+                <hr>
+                <p>Mobile Number -</p>
+                <input id="upmobile" type="text">
+                <br><br>
+                <hr>
+                <input type="button" id="upsubmit" value="Add" onclick="upsubmitForm()">
+                <input type="reset" id="resetup" value="Reset">
+            </form>
+            </div>
+          </form>
+      </div>
+
+    
+      <div id="show" hidden>
+          <hr>
+		  <div>
+          <table id="tableinfo" align = "center">
+		  </div>
+          </table>
+      </div>
+   
+   </body>
+
+</html>
